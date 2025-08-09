@@ -1,0 +1,137 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Support Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .chat-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-style: inherit;
+            font-weight: sans-serif;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #d8dee2;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: #222;
+            color: #fff;
+            box-shadow: 0 0 10px #000;
+            position: relative;
+        }
+        .chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 90px; /* Space for input bar */
+        }
+        /* User message on right with space */
+        .chat-box .user {
+            align-self: flex-end;
+            background-color: #000000;
+            color: #fff;
+            margin: 5px 0 5px 60px; /* space from left */
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+        /* Bot message on left with space */
+        .chat-box .bot {
+            align-self: flex-start;
+            background-color: #000;
+            color: #fff;
+            margin: 5px 60px 5px 0; /* space from right */
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+        .chat-input {
+            position: fixed;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: #222;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 16px;
+            font-size: 1.2em;
+            border-radius: 20px;
+            border: 1px solid #333;
+            outline: none;
+            background: #111;
+            color: #fff;
+        }
+        .chat-input button {
+            margin-left: 10px;
+            padding: 14px 28px;
+            font-size: 1.1em;
+            border: none;
+            background-color: #0b81a1;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1 class="chat-title">Customer Support Chatbot</h1>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add(sender); // Use classList for multiple classes if needed
+            messageDiv.innerText = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const userText = inputField.value;
+            if (userText.trim() === "") return;
+
+            appendMessage("user", userText);
+            inputField.value = "";
+
+            fetch("/get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ msg: userText })
+            })
+            .then(res => res.json())
+            .then(data => appendMessage("bot", data.response));
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
